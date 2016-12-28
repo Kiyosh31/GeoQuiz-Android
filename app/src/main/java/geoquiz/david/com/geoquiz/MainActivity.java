@@ -10,13 +10,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
+    private static final String TAG = "MainActivity";
+    private static final String KEY_INDEX = "index";
+
     private Button mTrueButton;
     private Button mFalseButton;
     private ImageButton mPreviusbutton;
     private ImageButton mNextButton;
     private TextView mQuestionTextView;
-
-    private static final String TAG = "QuizActivity";
 
     //arreglo de preguntas
     private Question[] mQuestionBank = new Question[] {
@@ -42,9 +43,12 @@ public class MainActivity extends AppCompatActivity {
 
         int messageResId = 0;
 
-        if (userPressedTrue == answerIsTrue) {
+        if (userPressedTrue == answerIsTrue)
+        {
             messageResId = R.string.correct_toast;
-        } else {
+        }
+        else
+        {
             messageResId = R.string.incorrect_toast;
         }
         Toast.makeText(this, messageResId, Toast.LENGTH_SHORT)
@@ -99,8 +103,8 @@ public class MainActivity extends AppCompatActivity {
         updateQuestion();
 
         //casting y setter del boton previus
-        mNextButton = (ImageButton) findViewById(R.id.previus_button);
-        mNextButton.setOnClickListener(new View.OnClickListener() {
+        mPreviusbutton = (ImageButton) findViewById(R.id.previus_button);
+        mPreviusbutton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 /*calcula la posicion del indice del arreglo y lo indica en siguiente
@@ -108,9 +112,22 @@ public class MainActivity extends AppCompatActivity {
                 updateQuestion();*/
             }
         });
+
+        //valida para la rotacion de la pantalla
+        if (savedInstanceState != null) {
+            mCurrentIndex = savedInstanceState.getInt(KEY_INDEX, 0);
+        }
+
         updateQuestion();
     }
 
+    //metodo para salvar el index de la pregunta al rotar la pantalla
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        super.onSaveInstanceState(savedInstanceState);
+        Log.i(TAG, "onSaveInstanceState");
+        savedInstanceState.putInt(KEY_INDEX, mCurrentIndex);
+    }
 
     //mensajes de estado de la aplicacion en consola
     @Override
