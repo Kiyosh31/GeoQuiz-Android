@@ -13,9 +13,7 @@ public class Question {
         mAnswerTrue = answerTrue;
     }
 
-    public int getTextResId() {
-        return mTextResId;
-    }
+    public int getTextResId() { return mTextResId; }
 
     public void setTextResId(int textResId) {
         mTextResId = textResId;

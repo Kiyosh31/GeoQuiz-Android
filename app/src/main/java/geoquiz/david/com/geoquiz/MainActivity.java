@@ -1,5 +1,7 @@
 package geoquiz.david.com.geoquiz;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -18,6 +20,8 @@ public class MainActivity extends AppCompatActivity {
     private ImageButton mPreviusbutton;
     private ImageButton mNextButton;
     private TextView mQuestionTextView;
+    private Button mCheatButton;
+    private static final int REQUEST_CODE_CHEAT = 0;
 
     //arreglo de preguntas
     private Question[] mQuestionBank = new Question[] {
@@ -31,6 +35,8 @@ public class MainActivity extends AppCompatActivity {
     //indice para el arreglo de preguntas
     private int mCurrentIndex = 0;
 
+    private boolean mIsCheater;
+
     //metodo para cambiar las preguntas
     private void updateQuestion() {
         int question = mQuestionBank[mCurrentIndex].getTextResId();
@@ -43,13 +49,21 @@ public class MainActivity extends AppCompatActivity {
 
         int messageResId = 0;
 
-        if (userPressedTrue == answerIsTrue)
+        if (mIsCheater)
         {
-            messageResId = R.string.correct_toast;
+            messageResId = R.string.judgment_toast;
         }
         else
         {
-            messageResId = R.string.incorrect_toast;
+            //messageResId = R.string.incorrect_toast;
+            if(userPressedTrue == answerIsTrue)
+            {
+                messageResId = R.string.correct_toast;
+            }
+            else
+            {
+                messageResId = R.string.incorrect_toast;
+            }
         }
         Toast.makeText(this, messageResId, Toast.LENGTH_SHORT)
                 .show();
@@ -97,6 +111,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 //calcula la posicion del indice del arreglo y lo indica en siguiente
                 mCurrentIndex = (mCurrentIndex + 1) % mQuestionBank.length;
+                mIsCheater = false;
                 updateQuestion();
             }
         });
@@ -113,12 +128,46 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        //casting y setter del boton cheat
+        mCheatButton = (Button) findViewById(R.id.cheat_button);
+        mCheatButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Intent -> objeto que los componentes (MainActivity) usan para comunicarse con el OS
+                //Antes de iniciar la actividad, ActivityManager comprueba el manifiest del paquete para una declaración con
+                //El mismo nombre que la Clase especificada.
+
+                //Intent i = new Intent(MainActivity.this, CheatActivity.class);
+
+                boolean answerIsTrue = mQuestionBank[mCurrentIndex].isAnswerTrue();
+                Intent i = CheatActivity.newIntent(MainActivity.this, answerIsTrue);
+                startActivityForResult(i, REQUEST_CODE_CHEAT);
+            }
+        });
+
         //valida para la rotacion de la pantalla
-        if (savedInstanceState != null) {
+        if (savedInstanceState != null)
+        {
             mCurrentIndex = savedInstanceState.getInt(KEY_INDEX, 0);
         }
-
         updateQuestion();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data){
+        if(resultCode != Activity.RESULT_OK)
+        {
+            return;
+        }
+
+        if(requestCode == REQUEST_CODE_CHEAT)
+        {
+            if(data == null)
+            {
+                return;
+            }
+            mIsCheater = CheatActivity.wasAnswerShown(data);
+        }
     }
 
     //metodo para salvar el index de la pregunta al rotar la pantalla
